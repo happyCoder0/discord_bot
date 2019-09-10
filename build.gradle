@@ -16,4 +16,5 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation 'net.dv8tion:JDA:3.5.0_329'
     implementation 'com.h2database:h2:1.4.199'
+    implementation 'org.scala-lang:scala-library:2.13.0'
 }

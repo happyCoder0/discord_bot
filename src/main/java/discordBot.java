@@ -27,7 +27,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjAyOTQwODA4MjYxMjcxNTcy.XTYKpg.-QIXIYyvuQbADLp2COi9F5Dp8ZY";
+        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXfmLQ.SECBBPxiy1MnfiCSth8GeAWrR9g";
         builder.addEventListener(new discordBot());
         builder.setToken(token);
         try{
@@ -64,6 +64,7 @@ public class discordBot extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         super.onGuildMessageReceived(event);
         ResultSet set = executeQuery("SELECT WORD FROM BANNED_WORDS WHERE SERV_ID='" + event.getGuild().getId() +"'");
+        Treater.treat(event);
         if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getChannel().canTalk()){
             /*
              * Обработка сообщений
