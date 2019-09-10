@@ -12,9 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class discordBot extends ListenerAdapter {
     public static final int MAX_WARNS = 3;
@@ -27,7 +25,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf0Og.ZdOGJNAG0sY7-CAPTMVVlQmnvgQ";
+        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf2kQ.XbF5BEoiCge2ElmCpNEMRDExpDE";
         builder.addEventListener(new discordBot());
         builder.setToken(token);
         try{
@@ -240,7 +238,7 @@ public class discordBot extends ListenerAdapter {
 
         try{
             while(set.next()){
-                ResultSet set1 = executeQuery("SELECT WARNS FROM USERS WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getEffectiveName() + "'");
+                ResultSet set1 = executeQuery("SELECT WARNS FROM USERS WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getUser().getId() + "'");
                 int warns = 0;
                 if(set1.next()){
                     warns = set1.getInt("WARNS");
@@ -259,17 +257,18 @@ public class discordBot extends ListenerAdapter {
                             warns++;
                             //обновляем запись в базе данных
                             executeUpdate("UPDATE USERS SET WARNS=" + warns + " WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getUser().getId() + "'");
-                            if(event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE)){
+                            if(event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE)) {
                                 event.getChannel().sendMessage(event.getMember().getEffectiveName() + ", вас предупредили " + warns + " раз(а). Еще " + (MAX_WARNS - warns) + " раз(а) и вам бан!").queue();
                             }
                             break;
-                        }else {
+                        }else{
                             //баним юзера
-                            event.getGuild().getController().ban(event.getMember(), 1).reason("Использование запрещенных слов").queue();
+                            event.getGuild().getController().ban(event.getMember(), 1).queue();
                             if(event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE)){
                                 event.getChannel().sendMessage("У участника " + event.getMember().getEffectiveName() + " накопилось максимум предупреждений. Он вернется к нам завтра").queue();
                             }
                             executeUpdate("UPDATE USERS SET WARNS=0 WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getUser().getId() + "'");
+                            break;
                         }
                     }
                 }
@@ -295,9 +294,9 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         for(Member member : event.getGuild().getMembers()){
-            if(!list.contains(member.getEffectiveName()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
+            if(!list.contains(member.getUser().getId()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
                 //вносим данные всех юзеров в базу данных
-                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "'");
+                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "')");
                 if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getGuild().getDefaultChannel().canTalk()){
                     event.getGuild().getDefaultChannel().sendMessage(member.getEffectiveName() + " был добавлен в базу данных.").queue();
                 }
@@ -318,7 +317,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         for(Member member : event.getGuild().getMembers()){
-            if(!list.contains(member.getEffectiveName()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
+            if(!list.contains(member.getUser().getId()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
                 //вносим данные всех юзеров в базу данных
                 executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "')");
                 if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getGuild().getDefaultChannel().canTalk()){
