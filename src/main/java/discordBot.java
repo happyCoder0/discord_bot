@@ -27,7 +27,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXfqNg.TDSCeZruIthAQ0HA1m_GxOl1hYQ";
+        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXfuxQ.t_idB22hv8I0tJxal6EwHA6_c0M";
         builder.addEventListener(new discordBot());
         builder.setToken(token);
         try{
@@ -64,12 +64,12 @@ public class discordBot extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         super.onGuildMessageReceived(event);
         ResultSet set = executeQuery("SELECT WORD FROM BANNED_WORDS WHERE SERV_ID='" + event.getGuild().getId() +"'");
-        if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getChannel().canTalk() & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase()){
+        if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getChannel().canTalk() & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase())){
             Treater.treat(event);
             /*
              * Обработка сообщений
              */
-            if(event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & event.getMember().hasPermission(Permission.ADMINISTRATOR))){
+            if(event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & event.getMember().hasPermission(Permission.ADMINISTRATOR)){
                 String[] arr = event.getMessage().getContentRaw().toLowerCase().split(" ");
                 ArrayList<String> list = new ArrayList<>();
                 try{
@@ -250,7 +250,7 @@ public class discordBot extends ListenerAdapter {
                 while(set2.next()){
                     list.add(set2.getString("CHAT_ID"));
                 }
-                if(event.getMessage().getContentRaw().toLowerCase().contains(set.getString("WORD").toLowerCase()) & !event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete banned word ") & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase()) & !event.getMessage().getContentRaw().contains("!request ") & !list.contains(event.getChannel().getId()) & !event.getMessage().getContentRaw().toLowerCase().contains("add ignored chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete ignored chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("get ignored chats") & !event.getMessage().getContentRaw().toLowerCase().contains("set srach chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete srach chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("get srach chat") & event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getMessage().getContentRaw().toLowerCase().equals(Treater.greet_message())){
+                if(event.getMessage().getContentRaw().toLowerCase().contains(set.getString("WORD").toLowerCase()) & !event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete banned word ") & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase()) & !event.getMessage().getContentRaw().contains("!request ") & !list.contains(event.getChannel().getId()) & !event.getMessage().getContentRaw().toLowerCase().contains("add ignored chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete ignored chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("get ignored chats") & !event.getMessage().getContentRaw().toLowerCase().contains("set srach chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("delete srach chat ") & !event.getMessage().getContentRaw().toLowerCase().contains("get srach chat") & event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & !event.getMessage().getContentRaw().toLowerCase().equals(Treater.greet_message())){
                     //предупреждаем юзера сообщением
                     event.getChannel().sendMessage(event.getMember().getEffectiveName() + ", следите за своим поведением!").queue();
                     if(event.getGuild().getSelfMember().hasPermission(Permission.BAN_MEMBERS) & !event.getMember().isOwner() & event.getGuild().getSelfMember().canInteract(event.getMember())){
@@ -258,7 +258,7 @@ public class discordBot extends ListenerAdapter {
                             //увеличиваем количество предупреждений юзера
                             warns++;
                             //обновляем запись в базе данных
-                            executeUpdate("UPDATE USERS SET WARNS=" + warns + ", UPDATE_DATE='" + (new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).substring(0,10).trim() + "' WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getUser().getId() + "'");
+                            executeUpdate("UPDATE USERS SET WARNS=" + warns + " WHERE SERV_ID='" + event.getGuild().getId() + "' AND NAME='" + event.getMember().getUser().getId() + "'");
                             if(event.getChannel().canTalk() & event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE)){
                                 event.getChannel().sendMessage(event.getMember().getEffectiveName() + ", вас предупредили " + warns + " раз(а). Еще " + (MAX_WARNS - warns) + " раз(а) и вам бан!").queue();
                             }
