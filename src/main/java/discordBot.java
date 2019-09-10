@@ -286,7 +286,7 @@ public class discordBot extends ListenerAdapter {
             event.getGuild().getDefaultChannel().sendMessage("Всем привет, я бот Аркадий. Я бот-модератор. Узнать список моих команд можно с помощью команды: !help.").queue();
         }
         ArrayList<String> list = new ArrayList<>();
-        ResultSet set = executeQuery("SELECT NAME FROM USERS WHERE SERV_ID='" + event.getGuild().getId() + "'");a
+        ResultSet set = executeQuery("SELECT NAME FROM USERS WHERE SERV_ID='" + event.getGuild().getId() + "'");
         try{
             while(set.next()){
                 list.add(set.getString("NAME"));
