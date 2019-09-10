@@ -27,7 +27,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXfuxQ.t_idB22hv8I0tJxal6EwHA6_c0M";
+        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf0Og.ZdOGJNAG0sY7-CAPTMVVlQmnvgQ";
         builder.addEventListener(new discordBot());
         builder.setToken(token);
         try{
@@ -46,10 +46,10 @@ public class discordBot extends ListenerAdapter {
                     while (true) {
                         Thread.sleep(86400 * 1000);
                         ResultSet set1;
-                        set1 = executeQuery("SELECT WARNS, NAME FROM USERS");
+                        set1 = executeQuery("SELECT SERV_ID, WARNS, NAME FROM USERS");
                         while (set1.next()) {
                             if(set1.getInt("WARNS") > 0){
-                                executeUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + ", UPDATE_DATE='" + (new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).substring(0,10) + "' WHERE NAME='" + set1.getString("NAME") + "'");
+                                executeUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + " WHERE NAME='" + set1.getString("NAME") + "' AND SERV_ID='" + set1.getString("SERV_ID") + "'");
                             }
                         }
                     }
@@ -297,7 +297,7 @@ public class discordBot extends ListenerAdapter {
         for(Member member : event.getGuild().getMembers()){
             if(!list.contains(member.getEffectiveName()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
                 //вносим данные всех юзеров в базу данных
-                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME, UPDATE_DATE) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "', '" + (new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).replace((new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).charAt(10), ' ').trim() + "')");
+                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "'");
                 if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getGuild().getDefaultChannel().canTalk()){
                     event.getGuild().getDefaultChannel().sendMessage(member.getEffectiveName() + " был добавлен в базу данных.").queue();
                 }
@@ -320,7 +320,7 @@ public class discordBot extends ListenerAdapter {
         for(Member member : event.getGuild().getMembers()){
             if(!list.contains(member.getEffectiveName()) & !member.getEffectiveName().equals("Аркадий") & !member.getUser().isBot()){
                 //вносим данные всех юзеров в базу данных
-                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME, UPDATE_DATE) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "', '" + (new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).replace((new SimpleDateFormat("YYYY-MM-DD")).format(new Date()).charAt(10), ' ').trim() + "')");
+                executeUpdate("INSERT INTO USERS(SERV_ID, WARNS, POINTS, NAME) VALUES('" + event.getGuild().getId() + "', 0, 10, '" + member.getUser().getId() + "')");
                 if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getGuild().getDefaultChannel().canTalk()){
                     event.getGuild().getDefaultChannel().sendMessage(member.getEffectiveName() + " был добавлен в базу данных.").queue();
                 }
