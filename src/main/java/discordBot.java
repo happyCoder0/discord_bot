@@ -25,7 +25,7 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf2kQ.XbF5BEoiCge2ElmCpNEMRDExpDE";
+        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf8zw.zYsWN0iOxJLQoqQQmLmTHYAuLpc";
         builder.addEventListener(new discordBot());
         builder.setToken(token);
         try{
