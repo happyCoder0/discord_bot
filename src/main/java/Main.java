@@ -1,43 +1,61 @@
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import db.DbUtil;
+import listeners.AbstractCommandListener;
+import org.reflections.Reflections;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class discordBot extends ListenerAdapter {
-    public static final int MAX_WARNS = 3;
-    public static final String helpMessage = "Вот список моих команд:\n!help - выводит список команд\nadd banned word example - добавляет слово example в список запрещенных. За употребление запрещенных слов я выдаю пользователям предупреждения.Три предупреждения и бан на 1 день(Требуется разрешение на бан участников).\ndelete banned word example - удаляет слово example из списка запрещенных.\nget banned words - выводит все запрещенные слова.\n!request url - позволяет сделать запрос к сайту по адресу url.\n!mywarns - выводит количество ваших предупреждений.\nadd ignored chat example - добавляет чат с id example в список игнорируемых.\ndelete ignored chat example - удаляет чат с id example из списка игнорируемых.\nget ignored chats - выводит id всех игнорируемых чатов";
-    private static final String DB_URL = "jdbc:h2:~/test";
-    public static void main(String[] args){
-        try{
-            Class.forName("org.h2.Driver").getDeclaredConstructor().newInstance();
-        }catch (Exception ex){
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Properties properties = new Properties();
+        try {
+            properties.load(Files.newInputStream(Paths.get("src/app.properties")));
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
-        JDABuilder builder = new JDABuilder(AccountType.BOT);
-        String token = "NjIxMDQzMzU1NTg5MDE3NjMx.XXf8zw.zYsWN0iOxJLQoqQQmLmTHYAuLpc";
-        builder.addEventListener(new discordBot());
-        builder.setToken(token);
-        try{
-            builder.buildAsync();
-        }catch (Exception ex){
-            System.out.print(ex.getMessage());
-        }
+
+        String token = properties.getProperty("token");
+
+        Reflections reflections = new Reflections("listeners");
+        Set<Class<? extends AbstractCommandListener>> listenerClasses =
+                reflections.getSubTypesOf(AbstractCommandListener.class);
+
+        ArrayList<AbstractCommandListener> listeners = new ArrayList<>();
+
+        listenerClasses.forEach(
+                aClass -> {
+                    try {
+                        if (!Modifier.isAbstract(aClass.getModifiers())) {
+                            System.out.println(aClass.getName());
+                            listeners.add(aClass.getConstructor().newInstance());
+                        }
+                    } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                             InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+
+        Bot bot = new Bot(token,
+                listeners
+                        .stream()
+                        .map(AbstractCommandListener::getData)
+                        .collect(Collectors.toList()),
+                listeners);
+        bot.launch();
 
         /*
          * Обнуление предупреждений юзера каждые 24 часа
          */
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 try{
@@ -47,7 +65,7 @@ public class discordBot extends ListenerAdapter {
                         set1 = executeQuery("SELECT SERV_ID, WARNS, NAME FROM USERS");
                         while (set1.next()) {
                             if(set1.getInt("WARNS") > 0){
-                                executeUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + " WHERE NAME='" + set1.getString("NAME") + "' AND SERV_ID='" + set1.getString("SERV_ID") + "'");
+                                exejcuteUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + " WHERE NAME='" + set1.getString("NAME") + "' AND SERV_ID='" + set1.getString("SERV_ID") + "'");
                             }
                         }
                     }
@@ -59,7 +77,7 @@ public class discordBot extends ListenerAdapter {
     }
     //h2 database jdbc url: jdbc:h2:~/test
     @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+    public void onGuildMessageReceived(GuildEve event) {
         super.onGuildMessageReceived(event);
         ResultSet set = executeQuery("SELECT WORD FROM BANNED_WORDS WHERE SERV_ID='" + event.getGuild().getId() +"'");
         if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getChannel().canTalk() & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase())){
@@ -67,7 +85,7 @@ public class discordBot extends ListenerAdapter {
             /*
              * Обработка сообщений
              */
-            if(event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & event.getMember().hasPermission(Permission.ADMINISTRATOR)){
+            /*if(event.getMessage().getContentRaw().toLowerCase().contains("add banned word ") & event.getMember().hasPermission(Permission.ADMINISTRATOR)){
                 String[] arr = event.getMessage().getContentRaw().toLowerCase().split(" ");
                 ArrayList<String> list = new ArrayList<>();
                 try{
@@ -350,7 +368,7 @@ public class discordBot extends ListenerAdapter {
     }
 
     //метод для выполнений запросов которые возвращают массивы данных
-    public static ResultSet executeQuery( String query){
+    public static ResultSet executeQuery(String query){
         ResultSet set = null;
         Statement st = createStatement();
         try{
@@ -371,5 +389,6 @@ public class discordBot extends ListenerAdapter {
             System.err.println(ex.getMessage());
         }
         return i;
+    }*/
     }
 }
