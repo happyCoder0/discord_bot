@@ -1,20 +1,17 @@
-import db.DbUtil;
 import listeners.AbstractCommandListener;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Properties properties = new Properties();
         try {
             properties.load(Files.newInputStream(Paths.get("src/app.properties")));

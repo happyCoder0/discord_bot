@@ -2,8 +2,6 @@ package listeners;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import java.sql.Connection;
-
 public class HelloCommandListener extends AbstractCommandListener {
 
     @Override
@@ -20,6 +18,6 @@ public class HelloCommandListener extends AbstractCommandListener {
 
     @Override
     public String getDescription() {
-        return  "Greets the user";
+        return "Greets the user";
     }
 }
