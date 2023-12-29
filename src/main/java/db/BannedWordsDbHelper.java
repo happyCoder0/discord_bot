@@ -1,15 +1,18 @@
 package db;
 
+import org.postgresql.util.PSQLException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class BannedWordsDbHelper {
 
-    public void insert(String serverId, String word) {
+    public void insert(String serverId, String word) throws PSQLException {
         String sql = "insert into banned_words(server_id, word) values(?, ?) on conflict do nothing";
         Connection connection = DbUtil.getDbConnection();
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -18,7 +21,7 @@ public class BannedWordsDbHelper {
             preparedStatement.executeUpdate();
 
             connection.close();
-        } catch (Exception ex) {
+        }  catch (SQLException ex) {
             System.out.println("insertion failed");
             System.out.println(ex.getClass().getName());
             System.out.println(ex.getMessage().toLowerCase(Locale.ROOT));
@@ -27,7 +30,7 @@ public class BannedWordsDbHelper {
 
     public List<String> findBannedWordsByServerId(String serverId) {
         ArrayList<String> words = new ArrayList<>();
-        String sql = "select word from banned words where server_id = ?";
+        String sql = "select word from banned_words where server_id = ?";
         Connection connection = DbUtil.getDbConnection();
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serverId);
@@ -50,11 +53,11 @@ public class BannedWordsDbHelper {
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serverId);
             preparedStatement.setString(2, word);
-            preparedStatement.executeUpdate(sql);
+            preparedStatement.executeUpdate();
 
             connection.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
         }
     }
 }

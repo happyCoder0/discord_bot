@@ -1,14 +1,12 @@
-import listeners.AbstractCommandListener;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -22,31 +20,24 @@ public class Main {
         String token = properties.getProperty("token");
 
         Reflections reflections = new Reflections("listeners");
-        Set<Class<? extends AbstractCommandListener>> listenerClasses =
-                reflections.getSubTypesOf(AbstractCommandListener.class);
+        Set<Class<? extends ListenerAdapter>> listenerClasses =
+                reflections.getSubTypesOf(ListenerAdapter.class);
 
-        ArrayList<AbstractCommandListener> listeners = new ArrayList<>();
+        ArrayList<ListenerAdapter> listeners = new ArrayList<>();
 
         listenerClasses.forEach(
-                aClass -> {
-                    try {
-                        if (!Modifier.isAbstract(aClass.getModifiers())) {
-                            System.out.println(aClass.getName());
-                            listeners.add(aClass.getConstructor().newInstance());
-                        }
-                    } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
-                             InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
+            aClass -> {
+                try {
+                    System.out.println(aClass.getName());
+                    listeners.add(aClass.getConstructor().newInstance());
+                } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                         InvocationTargetException e) {
+                    throw new RuntimeException(e);
                 }
+            }
         );
 
-        Bot bot = new Bot(token,
-                listeners
-                        .stream()
-                        .map(AbstractCommandListener::getData)
-                        .collect(Collectors.toList()),
-                listeners);
+        Bot bot = new Bot(token, listeners);
         bot.launch();
 
         /*
@@ -62,7 +53,7 @@ public class Main {
                         set1 = executeQuery("SELECT SERV_ID, WARNS, NAME FROM USERS");
                         while (set1.next()) {
                             if(set1.getInt("WARNS") > 0){
-                                exejcuteUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + " WHERE NAME='" + set1.getString("NAME") + "' AND SERV_ID='" + set1.getString("SERV_ID") + "'");
+                                executeUpdate("UPDATE USERS SET WARNS=" + (set1.getInt("WARNS") - 1) + " WHERE NAME='" + set1.getString("NAME") + "' AND SERV_ID='" + set1.getString("SERV_ID") + "'");
                             }
                         }
                     }
@@ -74,7 +65,7 @@ public class Main {
     }
     //h2 database jdbc url: jdbc:h2:~/test
     @Override
-    public void onGuildMessageReceived(GuildEve event) {
+    public void onGuildMessageReceived(GuildEvent event) {
         super.onGuildMessageReceived(event);
         ResultSet set = executeQuery("SELECT WORD FROM BANNED_WORDS WHERE SERV_ID='" + event.getGuild().getId() +"'");
         if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_WRITE) & event.getChannel().canTalk() & !event.getMessage().getContentRaw().toLowerCase().equals(helpMessage.toLowerCase())){
