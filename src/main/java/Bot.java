@@ -30,6 +30,10 @@ public class Bot {
                 .addCommands(Commands
                         .slash("hello", "Greets user")
                         .setGuildOnly(true))
+                .addCommands(Commands
+                        .slash("aic", "Adds chat with provided id to ignored list")
+                        .setGuildOnly(true)
+                        .addOption(OptionType.STRING, "chat_id", "Id of chat to ignore", true))
                 .queue();
     }
 
@@ -41,7 +45,6 @@ public class Bot {
         CommandListUpdateAction commandListUpdateAction = jda.updateCommands();
         try {
             jda.awaitReady();
-            //jda.awaitShutdown();
         } catch (InterruptedException ex) {
             System.out.println(ex.getMessage());
         }
