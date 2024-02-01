@@ -3,6 +3,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 public class Bot {
     public Bot(String token, List<ListenerAdapter> listeners) {
         JDABuilder builder = JDABuilder
-                .createLight(token);
+                .createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);
         listeners.forEach(builder::addEventListeners);
 
         jda = builder.build();
@@ -34,6 +35,16 @@ public class Bot {
                         .slash("aic", "Adds chat with provided id to ignored list")
                         .setGuildOnly(true)
                         .addOption(OptionType.STRING, "chat_id", "Id of chat to ignore", true))
+                .addCommands(Commands
+                        .slash("help", "Prints help message")
+                        .setGuildOnly(true))
+                .addCommands(Commands
+                        .slash("gic", "Gets list of all ignored chats on this server")
+                        .setGuildOnly(true))
+                .addCommands(Commands
+                        .slash("dic", "Deletes chat from ignored list")
+                        .setGuildOnly(true)
+                        .addOption(OptionType.STRING, "chat_id", "Id of chat to remove", true))
                 .queue();
     }
 

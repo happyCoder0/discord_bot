@@ -10,7 +10,8 @@ public class GetBannedWordsCommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equalsIgnoreCase("gbw")) return;
-        BannedWordsDbHelper dbHelper = new BannedWordsDbHelper();
+
+        BannedWordsDbHelper dbHelper = BannedWordsDbHelper.getInstance();
         List<String> words = dbHelper.findBannedWordsByServerId(event.getGuild().getId());
 
         StringBuilder builder = new StringBuilder();

@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.postgresql.util.PSQLException;
 
+import java.util.Objects;
+
 public class AddBannedWordCommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -14,9 +16,9 @@ public class AddBannedWordCommandListener extends ListenerAdapter {
         if (optionMapping == null) event.reply("Provide a word to ban").queue();
 
         String word = optionMapping.getAsString();
-        BannedWordsDbHelper dbHelper = new BannedWordsDbHelper();
+        BannedWordsDbHelper dbHelper = BannedWordsDbHelper.getInstance();
         try {
-            dbHelper.insert(event.getGuild().getId(), word);
+            dbHelper.insert(Objects.requireNonNull(event.getGuild()).getId(), word);
         } catch (PSQLException e) {
             event.reply(e.getServerErrorMessage().getMessage()).queue();
         }

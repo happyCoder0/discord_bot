@@ -6,19 +6,27 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
-public class AddIgnoredChatCommandListener extends ListenerAdapter {
+public class DeleteIgnoredChatCommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        if (!event.getName().equalsIgnoreCase("aic")) return;
+        super.onSlashCommandInteraction(event);
+
+        if (!event.getName().equalsIgnoreCase("dic")) return;
 
         OptionMapping optionMapping = event.getOption("chat_id");
         if (optionMapping == null) event.reply("Provide chat id").queue();
 
         String chatId = optionMapping.getAsString();
 
-        IgnoredChatsDbHelper dbHelper = IgnoredChatsDbHelper.getInstance();
-        dbHelper.insert(event.getGuild().getId(), chatId);
+        IgnoredChatsDbHelper helper = IgnoredChatsDbHelper.getInstance();
+        String serverId = event.getGuild().getId();
 
-        event.reply(String.format("Chat %s added to ignored list", chatId)).queue();
+        if (!helper.exists(serverId, chatId)) {
+            event.reply("Chat with id " + chatId + " is not ignored").queue();
+            return;
+        }
+
+        helper.delete(serverId, chatId);
+        event.reply("Chat with id " + chatId + " was deleted").queue();
     }
 }

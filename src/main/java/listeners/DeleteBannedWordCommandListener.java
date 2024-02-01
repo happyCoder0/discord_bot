@@ -15,7 +15,7 @@ public class DeleteBannedWordCommandListener extends ListenerAdapter {
         if (optionMapping == null) event.reply("Provide a banned word to delete").queue();
 
         String word = optionMapping.getAsString();
-        BannedWordsDbHelper dbHelper = new BannedWordsDbHelper();
+        BannedWordsDbHelper dbHelper = BannedWordsDbHelper.getInstance();
         dbHelper.deleteBannedWord(Objects.requireNonNull(event.getGuild()).getId(), word);
         event.reply(String.format("Word %s deleted from banned words list", word)).queue();
     }

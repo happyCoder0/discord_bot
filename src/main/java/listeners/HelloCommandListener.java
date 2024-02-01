@@ -9,6 +9,7 @@ public class HelloCommandListener extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equalsIgnoreCase("hello")) return;
         if (event.getMember() == null) System.out.println("member is null");
+
         event.reply(String.format("Hello, %s", event.getMember().getEffectiveName())).queue();
     }
 }
