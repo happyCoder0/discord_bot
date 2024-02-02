@@ -1,12 +1,14 @@
+import listeners.AbstractSlashCommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Bot {
     public Bot(String token, List<ListenerAdapter> listeners) {
@@ -16,36 +18,22 @@ public class Bot {
 
         jda = builder.build();
 
-        jda.updateCommands()
-                .addCommands(Commands
-                        .slash("dbw", "Deletes word from banned words list on this server")
-                        .setGuildOnly(true)
-                        .addOption(OptionType.STRING, "word", "Word to delete", true))
-                .addCommands(Commands
-                        .slash("abw", "Adds new banned word for this server")
-                        .setGuildOnly(true)
-                        .addOption(OptionType.STRING, "word", "Word to ban", true))
-                .addCommands(Commands
-                        .slash("gbw", "Prints list of banned words on this server")
-                        .setGuildOnly(true))
-                .addCommands(Commands
-                        .slash("hello", "Greets user")
-                        .setGuildOnly(true))
-                .addCommands(Commands
-                        .slash("aic", "Adds chat with provided id to ignored list")
-                        .setGuildOnly(true)
-                        .addOption(OptionType.STRING, "chat_id", "Id of chat to ignore", true))
-                .addCommands(Commands
-                        .slash("help", "Prints help message")
-                        .setGuildOnly(true))
-                .addCommands(Commands
-                        .slash("gic", "Gets list of all ignored chats on this server")
-                        .setGuildOnly(true))
-                .addCommands(Commands
-                        .slash("dic", "Deletes chat from ignored list")
-                        .setGuildOnly(true)
-                        .addOption(OptionType.STRING, "chat_id", "Id of chat to remove", true))
-                .queue();
+
+        CommandListUpdateAction commandListUpdateAction = jda.updateCommands();
+
+        List<AbstractSlashCommandListener> slashCommandListeners = listeners
+                .stream()
+                .filter(l -> l instanceof AbstractSlashCommandListener)
+                .map(l -> (AbstractSlashCommandListener) l)
+                .collect(Collectors.toList());
+
+        List<SlashCommandData> slashCommandData = slashCommandListeners.stream().map(l -> Commands
+                        .slash(l.getName(), l.getDescription())
+                        .setGuildOnly(l.getGuildOnly())
+                        .addOptions(l.getOptionDataList()))
+                .collect(Collectors.toList());
+
+        commandListUpdateAction.addCommands(slashCommandData).queue();
     }
 
     private final JDA jda;

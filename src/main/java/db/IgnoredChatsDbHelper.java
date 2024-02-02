@@ -80,8 +80,10 @@ public class IgnoredChatsDbHelper {
     }
 
     public List<String> findIgnoredChatsByServerId(String serverId) {
-        // optimize later
-        return cache.get(serverId);
+        List<String> chatIds = cache.get(serverId);
+
+        if (chatIds == null) return Collections.emptyList();
+        return chatIds;
     }
 
     public void registerServer(String serverId) {

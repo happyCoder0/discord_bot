@@ -2,16 +2,15 @@ package listeners;
 
 import db.IgnoredChatsDbHelper;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
 
-public class GetIgnoredChatsCommandListener extends ListenerAdapter {
+public class GetIgnoredChatsCommandListener extends AbstractSlashCommandListener {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        if(!event.getName().equalsIgnoreCase("gic")) return;
+        if(!event.getName().equalsIgnoreCase(getName())) return;
 
         IgnoredChatsDbHelper helper = IgnoredChatsDbHelper.getInstance();
         List<String> ignoredChatsByServerId = helper.findIgnoredChatsByServerId(
@@ -23,5 +22,15 @@ public class GetIgnoredChatsCommandListener extends ListenerAdapter {
         ignoredChatsByServerId.forEach(id -> messageBuilder.append(id.concat("\n")));
 
         event.reply(messageBuilder.toString()).queue();
+    }
+
+    @Override
+    public String getName() {
+        return "gic";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Gets list of all ignored chats on this server";
     }
 }

@@ -2,6 +2,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,7 +30,8 @@ public class Main {
             aClass -> {
                 try {
                     System.out.println(aClass.getName());
-                    listeners.add(aClass.getConstructor().newInstance());
+                    if (!Modifier.isAbstract(aClass.getModifiers()))
+                        listeners.add(aClass.getConstructor().newInstance());
                 } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
                          InvocationTargetException e) {
                     throw new RuntimeException(e);
