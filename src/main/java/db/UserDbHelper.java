@@ -97,8 +97,6 @@ public class UserDbHelper {
     }
 
     public int getWarnings(String serverId, String userId) {
-        System.out.println("params: server id: " + serverId + " user id: " + userId);
-        cache.forEach(u -> System.out.println("server id: " + u.getServerId() + " user id: " + u.getUserId()));
         return cache.stream()
                 .filter(u -> u.getServerId().equals(serverId)
                         && u.getUserId().equals(userId))
