@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +14,12 @@ import java.util.stream.Collectors;
 public class Bot {
     public Bot(String token, List<ListenerAdapter> listeners) {
         JDABuilder builder = JDABuilder
-                .createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);
+                .createLight(
+                        token,
+                        GatewayIntent.GUILD_MESSAGES,
+                        GatewayIntent.MESSAGE_CONTENT,
+                        GatewayIntent.GUILD_MEMBERS)
+                .setMemberCachePolicy(MemberCachePolicy.ALL);
         listeners.forEach(builder::addEventListeners);
 
         jda = builder.build();

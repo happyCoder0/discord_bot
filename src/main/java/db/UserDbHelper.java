@@ -32,21 +32,21 @@ public class UserDbHelper {
                 .collect(Collectors.toList());
     }
 
-    public void addUser(String serverId, String userId, int newWarnings) {
-        if (exists(serverId, userId))
-            cache.add(new UserEntry(serverId, userId, newWarnings));
+    public void addUser(String serverId, String userId) {
+        if (!exists(serverId, userId))
+            cache.add(new UserEntry(serverId, userId, 0));
         else return;
 
         String sql = "insert into users(server_id, user_id, warnings) values(?, ?, ?) on conflict do nothing";
         Connection connection = DbUtil.getDbConnection();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serverId);
             preparedStatement.setString(2, userId);
-            preparedStatement.setInt(3, newWarnings);
+            preparedStatement.setInt(3, 0);
             preparedStatement.executeUpdate();
 
             connection.close();
-        }  catch (SQLException ex) {
+        } catch (SQLException ex) {
             System.out.println("insertion failed");
             System.out.println(ex.getClass().getName());
             System.out.println(ex.getMessage().toLowerCase(Locale.ROOT));
@@ -66,7 +66,7 @@ public class UserDbHelper {
 
         String sql = "update users set warnings = ? where server_id = ? and user_id = ?";
         Connection connection = DbUtil.getDbConnection();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, newWarnings);
             preparedStatement.setString(2, serverId);
             preparedStatement.setString(3, userId);
@@ -85,7 +85,7 @@ public class UserDbHelper {
 
         String sql = "delete from users where server_id = ? and user_id = ?";
         Connection connection = DbUtil.getDbConnection();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serverId);
             preparedStatement.setString(2, userId);
             preparedStatement.executeUpdate();
@@ -97,6 +97,8 @@ public class UserDbHelper {
     }
 
     public int getWarnings(String serverId, String userId) {
+        System.out.println("params: server id: " + serverId + " user id: " + userId);
+        cache.forEach(u -> System.out.println("server id: " + u.getServerId() + " user id: " + u.getUserId()));
         return cache.stream()
                 .filter(u -> u.getServerId().equals(serverId)
                         && u.getUserId().equals(userId))
@@ -115,7 +117,7 @@ public class UserDbHelper {
         List<UserEntry> rows = new ArrayList<>();
         String sql = "select server_id, user_id, warnings from users";
         Connection connection = DbUtil.getDbConnection();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String serverId = resultSet.getString(1);
