@@ -105,6 +105,10 @@ public class UserDbHelper {
                 .orElseThrow(IllegalStateException::new);
     }
 
+    public List<UserEntry> getUsers() {
+        return cache;
+    }
+
     private boolean exists(String serverId, String userId) {
         return cache.stream()
                 .anyMatch(u -> u.getServerId().equals(serverId)
