@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO: check notion
 public class IgnoredChatsDbHelper {
     private static IgnoredChatsDbHelper instance;
     private final Map<String, List<String>> cache = new HashMap<>();
