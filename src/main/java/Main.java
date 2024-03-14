@@ -1,14 +1,13 @@
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.reflections.Reflections;
 import tasks.WarningsDecreaseTask;
+import util.ClassScanner;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.*;
 
 public class Main {
@@ -22,9 +21,13 @@ public class Main {
 
         String token = properties.getProperty("token");
 
-        Reflections reflections = new Reflections("listeners");
-        Set<Class<? extends ListenerAdapter>> listenerClasses =
-                reflections.getSubTypesOf(ListenerAdapter.class);
+        List<Class<?>> listenerClasses = new ArrayList<>();
+
+        try {
+            listenerClasses.addAll(ClassScanner.scanForListenerClasses());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
 
         ArrayList<ListenerAdapter> listeners = new ArrayList<>();
 
@@ -33,9 +36,8 @@ public class Main {
                 try {
                     System.out.println(aClass.getName());
                     if (!Modifier.isAbstract(aClass.getModifiers()))
-                        listeners.add(aClass.getConstructor().newInstance());
-                } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
-                         InvocationTargetException e) {
+                        listeners.add((ListenerAdapter) aClass.newInstance());
+                } catch (IllegalAccessException | InstantiationException e) {
                     throw new RuntimeException(e);
                 }
             }
